@@ -59,7 +59,10 @@ object GenJVM {
             emitLDC(1)
             ret.anchorToNext()
         }
-      case BoolLiteral(b) => throw new Exception("BoolLiteral not implimented")
+      case BoolLiteral(b) => b match{
+	case true => code.emitLDC(1)
+	case false => code.emitLDC(0)
+      }
     }
   }
 }
