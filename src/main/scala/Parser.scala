@@ -11,7 +11,6 @@ object Less extends Op
 
 abstract sealed class Expr
 case class IntLiteral(val value:Int) extends Expr
-case class StringLiteral(val value:String) extends Expr
 case class IfExpr(val pred:Expr, val texpr:Expr, val fexpr:Expr) extends Expr
 case class BinOp(val op:Op, val lhs:Expr , val rhs:Expr) extends Expr
 case class BoolLiteral(val b:Boolean) extends Expr

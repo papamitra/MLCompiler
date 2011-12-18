@@ -31,7 +31,6 @@ object GenJVM {
     import ctx._
     expr match {
       case IntLiteral(v) => code.emitLDC(v)
-      case StringLiteral(s) => throw new Exception("StringLiteral not implemented")
       case IfExpr(p, t, f) =>
         val fail = code.newLabel()
         val ret = code.newLabel()
