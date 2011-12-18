@@ -45,9 +45,9 @@ object GenJVM {
         emit(lhs, ctx)
         emit(rhs, ctx)
         op match {
-          case Plus => code.emitIADD()
-          case Minus => code.emitISUB()
-          case Multi => code.emitIMUL()
+          case Add => code.emitIADD()
+          case Sub => code.emitISUB()
+          case Mul => code.emitIMUL()
           case Less =>
             import code._
             val succ = newLabel()
