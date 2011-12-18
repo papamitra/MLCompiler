@@ -4,65 +4,18 @@ package localhost.ml
 import scala.util.parsing.combinator._
 import ch.epfl.lamp.fjbg._
 
-abstract sealed class Op{ def emit(code:JExtendedCode)}
-object Plus extends Op{  def emit(code:JExtendedCode){ code.emitIADD()}}
-object Minus extends Op{  def emit(code:JExtendedCode){ code.emitISUB()}}
-object Multi extends Op{  def emit(code:JExtendedCode){ code.emitIMUL()}}
-object Less extends Op{
-  def emit(code:JExtendedCode){ 
-    import code._
-    val succ = newLabel()
-    val ret = newLabel()
-    emitIF_ICMPLT(succ)
-    emitLDC(0)
-    emitGOTO(ret)
-    succ.anchorToNext()
-    emitLDC(1)
-    ret.anchorToNext()
-  }
-}
+abstract sealed class Op
+object Plus extends Op
+object Minus extends Op
+object Multi extends Op
+object Less extends Op
 
-abstract sealed class Expr{
-  def emit(code:JExtendedCode):Unit
-}
-
-case class IntLiteral(val value:Int) extends Expr{
-  def emit(code:JExtendedCode){
-    code.emitLDC(value)
-  }
-}
-case class StringLiteral(val value:String) extends Expr{
-  def emit(code:JExtendedCode){
-    throw new Exception("StringLiteral emit not Implemented")
-  }
-}
-case class IfExpr(val pred:Expr, val texpr:Expr, val fexpr:Expr) extends Expr{
-  def emit(code:JExtendedCode){
-    import code._
-    val fail = newLabel()
-    val ret = newLabel()
-    pred.emit(code)
-    emitIFEQ(fail)
-    texpr.emit(code)
-    emitGOTO(ret)
-    fail.anchorToNext()
-    fexpr.emit(code)
-    ret.anchorToNext()
-  }
-}
-case class BinOp(val op:Op, val lhs:Expr , val rhs:Expr) extends Expr{
-  def emit(code:JExtendedCode){
-    lhs.emit(code)
-    rhs.emit(code)
-    op.emit(code)
-  }
-}
-
-case class BoolLiteral(val b:Boolean) extends Expr{
-  def emit(code:JExtendedCode){
-    throw new Exception("Boolean emit not Implemented")
-  }
-}
+abstract sealed class Expr
+case class IntLiteral(val value:Int) extends Expr
+case class StringLiteral(val value:String) extends Expr
+case class IfExpr(val pred:Expr, val texpr:Expr, val fexpr:Expr) extends Expr
+case class BinOp(val op:Op, val lhs:Expr , val rhs:Expr) extends Expr
+case class BoolLiteral(val b:Boolean) extends Expr
 
 class MLParser extends JavaTokenParsers{
   def int: Parser[Expr] = (decimalNumber ^^ { case n=> IntLiteral(n.toInt)}
