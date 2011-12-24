@@ -21,8 +21,16 @@ class MLParserSuite extends FunSuite{
     assert(BinOp(Add, IntLiteral(1), IntLiteral(2)) == parse("(1) + (2)").get)
     assert(BinOp(Mul, BinOp(Add, IntLiteral(1), IntLiteral(2)) , IntLiteral(3)) == parse("(1+2) * 3").get)
     assert(BinOp(Add, IfExpr(BoolLiteral(true), IntLiteral(1), IntLiteral(2)), IntLiteral(3)) == parse("(if true then 1 else 2) + 3").get)
-//    assert(LetExpr(Symbo("a"), IntLiteral(1), BinOp(Plus, Symbol("a"), IntLiteral(1))) == parse("let a = 1 in a + 1"))
-//    assert(BinOp(Sub, IntLiteral
+
+    assert(BinOp(Add, Symbol("a"), IntLiteral(1)) == parse("a + 1").get)
+    assert(LetExpr(Symbol("a"), IntLiteral(1), BinOp(Add, Symbol("a"), IntLiteral(1))) == parse("let a = 1 in a + 1").get)
+    assert(BinOp(Sub, IntLiteral(1), BinOp(Add,
+      LetExpr(Symbol("a"), BinOp(Add, IntLiteral(1), IntLiteral(2)), BinOp(Mul, Symbol("a"), IntLiteral(2))),
+      IntLiteral(3))) == parse("1 - (let a = 1+2 in a * 2) + 3").get)
+    assert(LetExpr(Symbol("a"), IntLiteral(2),
+		   LetExpr(Symbol("b"), IntLiteral(3),
+			   LetExpr(Symbol("a"), IntLiteral(1), BinOp(Add, Symbol("a"), Symbol("b")))))
+	   == parse("let a=2 in let b=3 in let a=1 in a+b").get)
   }
 
   test("eval expr"){
@@ -36,5 +44,7 @@ class MLParserSuite extends FunSuite{
     assert(6 == eval("1+2+3"))
     assert(7 == eval("1+2*3"))
     assert(1 == eval("1 + if 2+2 < 3 then 3*2 else 0*3"))
+//    assert(1 == eval("let a=2 in a-1"))
+//    assert(4 == eval("let a=2 in let b=3 in let a=1 in a+b"))
   }
 }

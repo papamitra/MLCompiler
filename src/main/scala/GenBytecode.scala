@@ -3,7 +3,7 @@ package localhost.ml
 
 import ch.epfl.lamp.fjbg._
 
-class Context(val code: JExtendedCode)
+case class Context(val code: JExtendedCode, val method:JMethod, val env:List[JLocalVariable])
 
 object GenJVM {
   import scala.tools.nsc.interpreter.AbstractFileClassLoader
@@ -63,6 +63,14 @@ object GenJVM {
 	case true => code.emitLDC(1)
 	case false => code.emitLDC(0)
       }
+      case Symbol(name) =>
+	val variable = env.find(_.getName == name).get
+	code.emitLOAD(variable)
+      case LetExpr(sym @ Symbol(symName), defcode, expr) =>
+	emit(defcode, ctx)
+	val variable = method.addNewLocalVariable(JType.INT, symName)
+	code.emitSTORE(variable)
+	emit(expr, ctx.copy(env = variable :: ctx.env))
     }
   }
 }
@@ -90,7 +98,7 @@ class GenJVM(className: String, src: String) {
   val ast = parse(src).get
 
   val eval: Any = {
-    emit(ast, new Context(maincode))
+    emit(ast, new Context(maincode, mainMethod, Nil))
     maincode.emitIRETURN()
 
     write(jclass)
